@@ -1,0 +1,24 @@
+﻿@page "{id?}"
+@model LibraryManagement.UI.Pages.Admin.Authors.EditModel
+@{
+    var isNew = Model.Author.Id == 0;
+    ViewData["Title"] = isNew ? "Dodaj autora" : "Edytuj autora";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Author.Id" />
+
+    <div class="form-group">
+        <label asp-for="Author.FullName"></label>
+        <input asp-for="Author.FullName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Author.Bio"></label>
+        <textarea asp-for="Author.Bio" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Zapisz</button>
+    <a asp-page="Index" class="btn btn-secondary">Anuluj</a>
+</form>

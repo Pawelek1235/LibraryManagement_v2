@@ -1,0 +1,20 @@
+﻿syntax = "proto3";
+option csharp_namespace = "LibraryManagement.Grpc.Protos";
+
+service BookSearch {
+  rpc Search (SearchRequest) returns (SearchReply);
+}
+
+message SearchRequest {
+  string title = 1;
+}
+
+message SearchReply {
+  repeated BookDto books = 1;
+}
+
+message BookDto {
+  int32 id = 1;
+  string title = 2;
+  string authorName = 3;
+}

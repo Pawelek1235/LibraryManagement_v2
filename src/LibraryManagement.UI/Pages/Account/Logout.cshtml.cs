@@ -1,0 +1,25 @@
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace LibraryManagement.UI.Pages.Account
+{
+    public class LogoutModel : PageModel
+    {
+        public async Task<IActionResult> OnGetAsync()
+        {
+            // przy GET równie¿ wylogowujemy
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToPage("/Account/Login");
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            // wylogowanie przy POST (form)
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToPage("/Account/Login");
+        }
+    }
+}

@@ -1,0 +1,33 @@
+﻿@page
+@model LibraryManagement.UI.Pages.Admin.Authors.IndexModel
+@{
+    ViewData["Title"] = "Autorzy";
+}
+
+<h2>Autorzy</h2>
+<a asp-page="Edit" class="btn btn-success mb-3">Dodaj nowego autora</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var author in Model.Authors)
+        {
+            <tr>
+                <td>@author.FullName</td>
+               
+                <td>
+                    <a asp-page="Edit" asp-route-id="@author.Id" class="btn btn-sm btn-primary">Edytuj</a>
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@author.Id" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger">Usuń</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

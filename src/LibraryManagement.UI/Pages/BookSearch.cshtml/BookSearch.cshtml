@@ -1,0 +1,30 @@
+﻿@page
+@model LibraryManagement.UI.Pages.BookSearchModel
+@{
+    ViewData["Title"] = "Wyszukaj książki";
+}
+
+<h2>Wyszukaj książki</h2>
+<form method="post">
+    <input asp-for="Query" class="form-control" placeholder="Fragment tytułu" />
+    <button type="submit" class="btn btn-primary mt-2">Szukaj</button>
+</form>
+
+@if (Model.Results != null)
+{
+    <table class="table mt-3">
+        <thead>
+            <tr><th>ID</th><th>Tytuł</th><th>Autor</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var b in Model.Results)
+            {
+                <tr>
+                    <td>@b.Id</td>
+                    <td>@b.Title</td>
+                    <td>@b.AuthorName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,46 @@
+﻿@page "{id?}"
+@model LibraryManagement.UI.Pages.Admin.Books.EditModel
+
+@{
+    var isNew = Model.Book?.Id == 0;
+    ViewData["Title"] = isNew ? "Dodaj książkę" : "Edytuj książkę";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post" class="mt-4">
+    <div class="mb-3">
+        <label asp-for="Book.Title" class="form-label">Tytuł</label>
+        <input asp-for="Book.Title" class="form-control" />
+        <span asp-validation-for="Book.Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Book.ISBN" class="form-label">ISBN</label>
+        <input asp-for="Book.ISBN" class="form-control" />
+        <span asp-validation-for="Book.ISBN" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Book.AuthorId" class="form-label">Autor</label>
+        <select asp-for="Book.AuthorId" class="form-select">
+            <option value="">-- wybierz autora --</option>
+            @foreach (var a in Model.Authors)
+            {
+                <option value="@a.Id" selected="@(a.Id == Model.Book.AuthorId ? "selected" : null)">
+                    @a.FullName
+                </option>
+            }
+        </select>
+        <span asp-validation-for="Book.AuthorId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        @(isNew ? "Dodaj" : "Zapisz")
+    </button>
+    <a asp-page="Index" class="btn btn-secondary ms-2">Anuluj</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
