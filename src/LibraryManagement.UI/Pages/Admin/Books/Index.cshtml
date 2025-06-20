@@ -2,7 +2,7 @@
 @model LibraryManagement.UI.Pages.Admin.Books.IndexModel
 
 <h1>Lista książek</h1>
-<a asp-page="Edit" class="btn btn-success mb-3">Dodaj książkę</a>
+<a asp-page="Create" class="btn btn-success mb-3">Dodaj książkę</a>
 
 <table class="table">
    
@@ -21,7 +21,7 @@
                     <td>@book.Title</td>
                     <td>@book.AuthorName</td>   
                     <td>
-                        <a asp-page="Edit" asp-route-id="@book.Id">Edytuj</a>
+                        <a asp-page="Create" asp-route-id="@book.Id">Edytuj</a>
                     </td>
                 </tr>
             }
