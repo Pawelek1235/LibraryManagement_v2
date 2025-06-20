@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Grpc.Net.Client;
-using LibraryManagement.Grpc.Protos;
-using LibraryManagement.UI.Models;      // BookDto w projekcie UI
+using LibraryManagement.Contracts;    // BookDto
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,12 +11,23 @@ namespace LibraryManagement.UI.Pages
 {
     public class BookSearchModel : PageModel
     {
+        private readonly HttpClient _client;
+
+        // U¿ywamy ApiClient, bo w Program.cs jest on skonfigurowany z BaseAddress do Twojego API
+        public BookSearchModel(IHttpClientFactory httpFactory)
+        {
+            _client = httpFactory.CreateClient("ApiClient");
+        }
+
         [BindProperty]
         public string Query { get; set; }
 
         public List<BookDto> Results { get; set; } = new();
 
-        public void OnGet() { }
+        public void OnGet()
+        {
+            // tylko pokazujemy stronê – bez wyszukiwania
+        }
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -29,23 +39,20 @@ namespace LibraryManagement.UI.Pages
 
             try
             {
-                using var channel = GrpcChannel.ForAddress("https://localhost:5002");
-                var client = new BookSearch.BookSearchClient(channel);
-                var reply = await client.SearchAsync(new SearchRequest { Title = Query });
+                // Skonstruuj œcie¿kê wzglêdn¹ – BaseAddress jest ju¿ ustawione w ApiClient
+                var url = $"api/books/search?title={Uri.EscapeDataString(Query)}";
 
-                Results = reply.Books
-                    .Select(p => new BookDto
-                    {
-                        Id = p.Id,
-                        Title = p.Title,
-                        //authorId = p.Au
-                         
-                    })
-                    .ToList();
+                // Wyœlij ¿¹danie GET i deserializuj JSON do List<BookDto>
+                var response = await _client.GetFromJsonAsync<List<BookDto>>(url);
+                Results = response ?? new List<BookDto>();
+            }
+            catch (HttpRequestException httpEx)
+            {
+                ModelState.AddModelError("", $"B³¹d HTTP: {httpEx.Message}");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"B³¹d API: {ex.Message}");
+                ModelState.AddModelError("", $"Nieoczekiwany b³¹d: {ex.Message}");
             }
 
             return Page();

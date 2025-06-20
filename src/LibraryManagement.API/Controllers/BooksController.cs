@@ -35,6 +35,31 @@ namespace LibraryManagement.API.Controllers
 
             return Ok(dtos);
         }
+        // GET: api/books/search?title=Foo
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<BookDto>>> Search([FromQuery] string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                return BadRequest("Title query parameter is required.");
+
+            var books = await _uow.Books
+                .Query()
+                .Include(b => b.Author)
+                .Where(b => b.Title.Contains(title!))
+                .ToListAsync();
+
+            var dtos = books.Select(b => new BookDto
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Isbn = b.ISBN,
+                AuthorId = b.AuthorId,
+                AuthorName = b.Author.FullName,
+                
+            });
+
+            return Ok(dtos);
+        }
 
         // GET: api/books/5
         [HttpGet("{id:int}")]

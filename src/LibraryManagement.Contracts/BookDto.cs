@@ -7,5 +7,8 @@
         public string Isbn { get; set; } = string.Empty;
         public int AuthorId { get; set; }
         public string AuthorName { get; set; } = string.Empty;
+
+        // Dodaj tę właściwość:
+        public DateTime PublishDate { get; set; }
     }
 }

@@ -4,27 +4,61 @@
     ViewData["Title"] = "Wyszukaj książki";
 }
 
-<h2>Wyszukaj książki</h2>
-<form method="post">
-    <input asp-for="Query" class="form-control" placeholder="Fragment tytułu" />
-    <button type="submit" class="btn btn-primary mt-2">Szukaj</button>
+<h1>@ViewData["Title"]</h1>
+
+<form method="post" class="row g-2 mb-4">
+    <div class="col-auto">
+        <input asp-for="Query" class="form-control" placeholder="Wpisz tytuł..." />
+        <span asp-validation-for="Query" class="text-danger"></span>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary mb-3">Szukaj</button>
+    </div>
 </form>
 
-@if (Model.Results != null)
+@if (!ModelState.IsValid)
 {
-    <table class="table mt-3">
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@e.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (Model.Results?.Any() == true)
+{
+    <table class="table table-striped">
         <thead>
-            <tr><th>ID</th><th>Tytuł</th><th>Autor</th></tr>
+            <tr>
+                <th>Tytuł</th>
+                <th>Autor</th>
+                <th>ISBN</th>
+                <th>Data wydania</th>
+            </tr>
         </thead>
         <tbody>
             @foreach (var b in Model.Results)
             {
                 <tr>
-                    <td>@b.Id</td>
                     <td>@b.Title</td>
                     <td>@b.AuthorName</td>
+                    <td>@b.Isbn</td>
+                    <td>@(b.PublishDate.ToShortDateString())</td>
                 </tr>
             }
         </tbody>
     </table>
+}
+else if (Model.Results != null)
+{
+    <div class="alert alert-info">
+        Brak wyników dla „@Model.Query”.
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
