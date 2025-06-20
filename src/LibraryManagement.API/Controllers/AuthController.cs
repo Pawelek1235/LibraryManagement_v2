@@ -1,12 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using LibraryManagement.API.Models;
-using LibraryManagement.Core.Entities;
-using LibraryManagement.Core.Interfaces;
+﻿using LibraryManagement.Core.Interfaces;
 using LibraryManagement.Infrastructure.Services;
-using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+using LibraryManagement.Contracts;
+
 
 namespace LibraryManagement.API.Controllers
 {
@@ -24,43 +22,34 @@ namespace LibraryManagement.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest req)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto req)
         {
-            // 1. Znajdź użytkownika po email
             var members = await _uow.Members.GetAllAsync();
             var member = members
-                          .FirstOrDefault(m =>
-                              m.Email.Equals(req.Email, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(m =>
+                    m.Email.Equals(req.Email, StringComparison.OrdinalIgnoreCase));
 
-            if (member == null)
-                return Unauthorized(new { message = "Nieprawidłowy email lub hasło." });
-
-            // 2. Zweryfikuj hasło
-            if (!PasswordService.VerifyPassword(req.Password,
-                                                member.PasswordHash,
-                                                member.PasswordSalt))
+            if (member == null ||
+                !PasswordService.VerifyPassword(req.Password,
+                                               member.PasswordHash,
+                                               member.PasswordSalt))
             {
                 return Unauthorized(new { message = "Nieprawidłowy email lub hasło." });
             }
 
-            // 3. Wygeneruj token i oblicz datę wygaśnięcia
             var token = _jwtGen.GenerateToken(member.Id, member.Role);
-            var expires = DateTime.UtcNow.AddMinutes(_jwtGen.ExpiresMinutes);
+            var expires = DateTime.UtcNow.AddMinutes(_jwtGen.ExpiresInMinutes);
 
-            // 4. Zwróć wynik
-            var response = new AuthResponse
+            var response = new AuthResponseDto
             {
                 Token = token,
-                Expires = expires
-            };
-            return Ok(new AuthResponse
-            {
-                Token = token,
-                Expires = expires,
+                ExpiresInMinutes = _jwtGen.ExpiresInMinutes,
                 UserId = member.Id,
-                Role = member.Role      // zakładam, że masz Member.Role = "Admin"
-            });
+                Role = member.Role
+            };
 
+            return Ok(response);
         }
     }
 }

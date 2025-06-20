@@ -4,8 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using LibraryManagement.API.Models;
-using LibraryManagement.UI.Models;                 // ? import Twoich modeli
+using LibraryManagement.Contracts;             // LoginRequestDto, AuthResponseDto
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +16,6 @@ namespace LibraryManagement.UI.Pages.Account
     {
         private readonly HttpClient _client;
 
-        // Wstrzykujemy nazwany HttpClient "ApiClient" skonfigurowany w Program.cs
         public LoginModel(IHttpClientFactory httpFactory)
         {
             _client = httpFactory.CreateClient("ApiClient");
@@ -36,7 +34,6 @@ namespace LibraryManagement.UI.Pages.Account
 
         public void OnGet()
         {
-            // Czyúcimy poprzednie komunikaty
             ErrorMessage = null;
         }
 
@@ -45,14 +42,14 @@ namespace LibraryManagement.UI.Pages.Account
             if (!ModelState.IsValid)
                 return Page();
 
-            // 1) Przygotuj øπdanie logowania
-            var loginReq = new LoginRequest
+            // 1) Przygotuj DTO logowania
+            var loginReq = new LoginRequestDto
             {
                 Email = Email,
                 Password = Password
             };
 
-            // 2) Wyúlij do API (relatywne URI, bo BaseAddress ustawiony)
+            // 2) Wyúlij do API
             var response = await _client.PostAsJsonAsync("api/auth/login", loginReq);
             if (!response.IsSuccessStatusCode)
             {
@@ -60,31 +57,38 @@ namespace LibraryManagement.UI.Pages.Account
                 return Page();
             }
 
-            // 3) Odczytaj odpowiedü z tokenem, expires i rolπ
-            var auth = await response.Content.ReadFromJsonAsync<AuthResponse>();
+            // 3) Odczytaj odpowiedü z serwera
+            var auth = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+            if (auth is null)
+            {
+                ErrorMessage = "B≥πd podczas logowania";
+                return Page();
+            }
 
-            // 4) Przygotuj claims (UserId ? string)
+            // 4) Przygotuj claims
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, auth.UserId.ToString()),
-                new Claim(ClaimTypes.Name, Email),
-                new Claim(ClaimTypes.Role, auth.Role)
+                new Claim(ClaimTypes.Name,           Email),
+                new Claim(ClaimTypes.Role,           auth.Role)
             };
-
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            // 5) Zaloguj i ustaw cookie na okres waønoúci tokenu
+            // 5) Oblicz moment wygaúniÍcia cookie
+            var expiresUtc = DateTimeOffset.UtcNow.AddMinutes(auth.ExpiresInMinutes);
+
+            // 6) Zaloguj uøytkownika (cookie)
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal,
                 new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = auth.Expires
+                    ExpiresUtc = expiresUtc
                 });
 
-            // 6) Przekieruj do panelu Admin
+            // 7) Przekieruj do panelu admin
             return RedirectToPage("/Admin/Books/Index");
         }
     }

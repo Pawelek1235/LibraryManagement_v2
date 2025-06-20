@@ -12,39 +12,45 @@ namespace LibraryManagement.Infrastructure.Services
     {
         private readonly AppSettings _settings;
 
-        public JwtTokenGenerator(IOptions<AppSettings> settings)
+        public JwtTokenGenerator(IOptions<AppSettings> options)
         {
-            _settings = settings.Value;
+            _settings = options.Value;
         }
 
         /// <summary>
         /// Czas życia tokenu w minutach, eksponowany publicznie.
         /// </summary>
-        public int ExpiresMinutes => _settings.JwtExpiresMinutes;
+        public int ExpiresInMinutes => _settings.JwtExpiresMinutes;
 
         /// <summary>
-        /// Generuje token JWT podpisany HMAC-SHA256.
+        /// Generuje token JWT podpisany HMAC-SHA256, z Issuer i Audience.
         /// </summary>
         public string GenerateToken(int userId, string role)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_settings.JwtSecret);
+            var keyBytes = Encoding.UTF8.GetBytes(_settings.JwtSecret);
+            var signingKey = new SymmetricSecurityKey(keyBytes);
 
-            var descriptor = new SecurityTokenDescriptor
+            var claims = new[]
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                    new Claim(ClaimTypes.Role, role)
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(_settings.JwtExpiresMinutes),
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature)
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(ClaimTypes.Role,           role),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var token = tokenHandler.CreateToken(descriptor);
-            return tokenHandler.WriteToken(token);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(_settings.JwtExpiresMinutes),
+                Issuer = _settings.JwtIssuer,
+                Audience = _settings.JwtAudience,
+                SigningCredentials = new SigningCredentials(
+                    signingKey,
+                    SecurityAlgorithms.HmacSha256)
+            };
+
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.CreateToken(tokenDescriptor);
+            return handler.WriteToken(token);
         }
     }
 }

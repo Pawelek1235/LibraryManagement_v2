@@ -2,14 +2,9 @@
 {
     public class AppSettings
     {
-        /// <summary>
-        /// Sekret używany do podpisywania tokenów JWT (powinien być długi i losowy).
-        /// </summary>
-        public string JwtSecret { get; set; }
-
-        /// <summary>
-        /// Czas życia tokenu w minutach.
-        /// </summary>
+        public string JwtSecret { get; set; } = string.Empty;
+        public string JwtIssuer { get; set; } = string.Empty;
+        public string JwtAudience { get; set; } = string.Empty;
         public int JwtExpiresMinutes { get; set; }
     }
 }
