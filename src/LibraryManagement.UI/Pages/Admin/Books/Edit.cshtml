@@ -1,14 +1,11 @@
-﻿@page
-@model LibraryManagement.UI.Pages.Admin.Books.CreateModel
+﻿@page "{id:int}"
+@model LibraryManagement.UI.Pages.Admin.Books.EditModel
 
-@{
-    ViewData["Title"] = "Dodaj książkę";
-}
 
-<h1>@ViewData["Title"]</h1>
+<h1>@(Model.Book.Id == 0 ? "Dodaj książkę" : "Edytuj książkę")</h1>
 
 <form method="post">
-    <div asp-validation-summary="All" class="text-danger"></div>
+    <input type="hidden" asp-for="Book.Id" />
 
     <div class="mb-3">
         <label asp-for="Book.Title" class="form-label">Tytuł</label>
@@ -28,13 +25,15 @@
             <option value="">-- wybierz autora --</option>
             @foreach (var a in Model.Authors)
             {
-                <option value="@a.Id">@a.FullName</option>
+                <option value="@a.Id" selected="@(a.Id == Model.Book.AuthorId)">
+                    @a.FullName
+                </option>
             }
         </select>
         <span asp-validation-for="Book.AuthorId" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-success">Dodaj</button>
+    <button type="submit" class="btn btn-primary">Zapisz</button>
     <a asp-page="./Index" class="btn btn-secondary ms-2">Anuluj</a>
 </form>
 

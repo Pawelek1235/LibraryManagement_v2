@@ -1,91 +1,47 @@
+using LibraryManagement.Contracts;       // CreateBookDto, BookDto, UpdateBookDto
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using LibraryManagement.Core.Entities;
-using LibraryManagement.UI.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace LibraryManagement.UI.Pages.Admin.Books
 {
-    public class EditModel : PageModel
+    public class CreateModel : PageModel
     {
         private readonly HttpClient _client;
-
-        public EditModel(IHttpClientFactory httpFactory)
-        {
-            _client = httpFactory.CreateClient("ApiClient");
-        }
+        public CreateModel(IHttpClientFactory httpFactory)
+            => _client = httpFactory.CreateClient("ApiClient");
 
         [BindProperty]
-        public Book Book { get; set; }
+        public CreateBookDto Book { get; set; } = new();
 
-        /// <summary>
-        /// Lista autorów do dropdowna
-        /// </summary>
+        // Lista autorów do dropdowna
         public List<AuthorDto> Authors { get; set; } = new();
 
-        public async Task OnGetAsync(int? id)
+        public async Task OnGetAsync()
         {
-            // Dodajemy JWT
-            _client.DefaultRequestHeaders.Remove("Authorization");
-            _client.DefaultRequestHeaders.Add(
-                "Authorization", $"Bearer {Request.Cookies["jwt"]}");
-
-            // Pobranie wszystkich autorów
+            // pobierz autorów z API
             Authors = await _client.GetFromJsonAsync<List<AuthorDto>>("api/authors")
                       ?? new List<AuthorDto>();
-
-            // Nowy lub istniej¹cy obiekt Book
-            if (id.HasValue && id.Value > 0)
-            {
-                Book = await _client.GetFromJsonAsync<Book>($"api/books/{id.Value}")
-                       ?? new Book();
-            }
-            else
-            {
-                Book = new Book();
-            }
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Odœwie¿ token
-            _client.DefaultRequestHeaders.Remove("Authorization");
-            _client.DefaultRequestHeaders.Add(
-                "Authorization", $"Bearer {Request.Cookies["jwt"]}");
-
-            // Uzupe³nij wymagane pola, by API nie rzuca³o 400:
-            Book.Loans ??= new List<Loan>();
-
-            // Je¿eli API wymaga obiektu Author zamiast tylko AuthorId:
-            var selectedAuthor = Authors.FirstOrDefault(a => a.Id == Book.AuthorId);
-            if (selectedAuthor != null)
+            if (!ModelState.IsValid)
             {
-                Book.Author = new Author
-                {
-                    Id = selectedAuthor.Id,
-                    FullName = selectedAuthor.FullName
-                    // wype³nij inne pola Author, jeœli potrzebne
-                };
+                await OnGetAsync();  // za³aduj ponownie Authors
+                return Page();
             }
 
-            if (Book.Id == 0)
-            {
-                // Create
-                var response = await _client.PostAsJsonAsync("api/books", Book);
-                response.EnsureSuccessStatusCode();
-            }
-            else
-            {
-                // Update
-                var response = await _client.PutAsJsonAsync($"api/books/{Book.Id}", Book);
-                response.EnsureSuccessStatusCode();
-            }
+            var response = await _client.PostAsJsonAsync("api/books", Book);
+            if (response.IsSuccessStatusCode)
+                return RedirectToPage("./Index");
 
-            return RedirectToPage("Index");
+            ModelState.AddModelError("", "Nie uda³o siê dodaæ ksi¹¿ki.");
+            await OnGetAsync();
+            return Page();
         }
     }
 }
