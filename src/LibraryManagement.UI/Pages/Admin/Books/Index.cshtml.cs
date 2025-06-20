@@ -1,21 +1,18 @@
-using LibraryManagement.Core.Entities;
-using LibraryManagement.Grpc.Protos;
-using LibraryManagement.UI.Models;        // ? dodaj tê przestrzeñ nazw
+using LibraryManagement.UI.Models; // BookDto
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-
+using LibraryManagement.Grpc.Protos;
 namespace LibraryManagement.UI.Pages.Admin.Books
 {
     public class IndexModel : PageModel
     {
         private readonly HttpClient _client;
-        public IndexModel(IHttpClientFactory httpFactory)
-            => _client = httpFactory.CreateClient("ApiClient");
 
-        // zamiast IEnumerable<Book> u¿yj List<Book>
+        public IndexModel(IHttpClientFactory httpFactory)
+        {
+            _client = httpFactory.CreateClient("ApiClient");
+        }
+
         public List<BookDto> Books { get; set; } = new();
 
         public async Task OnGetAsync()
@@ -23,10 +20,25 @@ namespace LibraryManagement.UI.Pages.Admin.Books
             _client.DefaultRequestHeaders.Remove("Authorization");
             _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {Request.Cookies["jwt"]}");
 
-            // GetFromJsonAsync zwraca List<Book>, wiêc od razu przypisujesz
             Books = await _client.GetFromJsonAsync<List<BookDto>>("api/books")
-           ?? new List<BookDto>();
+                    ?? new List<BookDto>();
+        }
+
+        // handler wywo³ywany przez <form asp-page-handler="Delete">
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
+        {
+            _client.DefaultRequestHeaders.Remove("Authorization");
+            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {Request.Cookies["jwt"]}");
+
+            var response = await _client.DeleteAsync($"api/books/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                // mo¿esz odœwie¿yæ listê, albo po prostu przekierowaæ i prze³adowaæ OnGet
+                return RedirectToPage();
+            }
+            ModelState.AddModelError("", "B³¹d usuwania ksi¹¿ki.");
+            await OnGetAsync();
+            return Page();
         }
     }
-
 }

@@ -13,6 +13,8 @@
     <EmbeddedResource Remove="Interfaces - Copy\**" />
     <None Remove="Entities - Copy\**" />
     <None Remove="Interfaces - Copy\**" />
+    <None Include="..\LibraryManagement.UI\Pages\Admin\Books\Index.cshtml" Link="Index.cshtml" />
+	 
   </ItemGroup>
 
 </Project>

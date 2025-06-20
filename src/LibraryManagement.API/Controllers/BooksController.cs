@@ -1,6 +1,4 @@
-﻿// LibraryManagement.API/Controllers/BooksController.cs
-using LibraryManagement.API.Models;
-using LibraryManagement.Core.DTOs;
+﻿using LibraryManagement.Contracts;
 using LibraryManagement.Core.Entities;
 using LibraryManagement.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -19,94 +17,101 @@ namespace LibraryManagement.API.Controllers
 
         // GET: api/books
         [HttpGet]
-        public async Task<IEnumerable<BookDto>> GetAll()
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetAll()
         {
-            return await _uow.Books
+            var books = await _uow.Books
                 .Query()
                 .Include(b => b.Author)
-                .Select(b => new BookDto
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    ISBN = b.ISBN,
-                    AuthorName = b.Author.FullName
-                })
                 .ToListAsync();
+
+            var dtos = books.Select(b => new BookDto
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Isbn = b.ISBN,
+                AuthorId = b.AuthorId,
+                AuthorName = b.Author.FullName
+            });
+
+            return Ok(dtos);
         }
 
         // GET: api/books/5
         [HttpGet("{id:int}")]
         public async Task<ActionResult<BookDto>> GetById(int id)
         {
-            var book = await _uow.Books
+            var b = await _uow.Books
                 .Query()
-                .Include(b => b.Author)
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .Include(x => x.Author)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
-            if (book == null)
+            if (b == null)
                 return NotFound();
 
             var dto = new BookDto
             {
-                Id = book.Id,
-                Title = book.Title,
-                AuthorName = book.Author.FullName
+                Id = b.Id,
+                Title = b.Title,
+                Isbn = b.ISBN,
+                AuthorId = b.AuthorId,
+                AuthorName = b.Author.FullName
             };
-            return dto;
+
+            return Ok(dto);
         }
 
         // POST: api/books
-        // 2. Zmień akcję Create:
         [HttpPost]
         public async Task<ActionResult<BookDto>> Create([FromBody] CreateBookDto input)
         {
-            // mapowanie DTO -> encja
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var book = new Book
             {
                 Title = input.Title,
-                ISBN = input.ISBN,
-                AuthorId = input.AuthorId,
-                Loans = new List<Loan>()   // inicjalizacja pustych wypożyczeń
+                ISBN = input.Isbn,
+                AuthorId = input.AuthorId
             };
 
             await _uow.Books.AddAsync(book);
             await _uow.SaveChangesAsync();
 
-            // ponownie pobieramy z autorem, by zwrócić BookDto
+            // ponownie pobieramy z autorem, by mieć FullName
             var created = await _uow.Books
                 .Query()
                 .Include(b => b.Author)
                 .FirstOrDefaultAsync(b => b.Id == book.Id);
 
-            var dto = new BookDto
+            var result = new BookDto
             {
                 Id = created!.Id,
                 Title = created.Title,
-                ISBN = created.ISBN,
+                Isbn = created.ISBN,
+                AuthorId = created.AuthorId,
                 AuthorName = created.Author.FullName
             };
 
             return CreatedAtAction(
                 nameof(GetById),
-                new { id = dto.Id },
-                dto
+                new { id = result.Id },
+                result
             );
         }
 
-
         // PUT: api/books/5
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Book input)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateBookDto input)
         {
-            if (id != input.Id)
-                return BadRequest();
+            if (!ModelState.IsValid || id != input.Id)
+                return BadRequest(ModelState);
 
             var existing = await _uow.Books.GetByIdAsync(id);
             if (existing == null)
                 return NotFound();
 
-            // Tylko aktualizujemy wymagane pola
             existing.Title = input.Title;
+            existing.ISBN = input.Isbn;
             existing.AuthorId = input.AuthorId;
 
             _uow.Books.Update(existing);

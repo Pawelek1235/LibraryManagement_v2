@@ -1,9 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\LibraryManagement.Core\LibraryManagement.Core.csproj" />
-    <ProjectReference Include="..\LibraryManagement.Infrastructure\LibraryManagement.Infrastructure.csproj" />
     <ProjectReference Include="..\LibraryManagement.Grpc\LibraryManagement.Grpc.csproj" />
+    <ProjectReference Include="..\LibraryManagement.Contracts\LibraryManagement.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

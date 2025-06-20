@@ -15,16 +15,25 @@
         }
         else
         {
-            @foreach (var book in Model.Books)
+            @foreach (var item in Model.Books)
             {
                 <tr>
-                    <td>@book.Title</td>
-                    <td>@book.AuthorName</td>   
+                    <td>@item.Title</td>
+                    <td>@item.AuthorName</td>
                     <td>
-                        <a asp-page="Create" asp-route-id="@book.Id">Edytuj</a>
+                        <a asp-page="./Edit" asp-route-id="@item.Id">Edytuj</a>
+                        |
+                        <form method="post"
+                              asp-page-handler="Delete"
+                              asp-route-id="@item.Id"
+                              style="display:inline"
+                              onsubmit="return confirm('Na pewno usunąć tę książkę?');">
+                            <button type="submit" class="btn btn-link p-0">Usuń</button>
+                        </form>
                     </td>
                 </tr>
             }
+
 
         }
     </tbody>
