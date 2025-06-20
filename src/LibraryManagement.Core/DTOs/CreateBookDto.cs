@@ -1,5 +1,4 @@
-﻿// LibraryManagement.Core/DTOs/CreateBookDto.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagement.Core.DTOs
 {

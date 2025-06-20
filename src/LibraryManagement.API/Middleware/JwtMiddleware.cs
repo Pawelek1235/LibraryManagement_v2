@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using LibraryManagement.Infrastructure.Configuration;
-using Microsoft.Extensions.Options;    // żeby IOptions<AppSettings> działało
 
 
 namespace LibraryManagement.API.Middleware
@@ -58,9 +57,7 @@ namespace LibraryManagement.API.Middleware
                 var userId = int.Parse(jwt.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
                 var role = jwt.Claims.First(c => c.Type == ClaimTypes.Role).Value;
 
-                // Przykładowo: możesz pobrać użytkownika z bazy:
-                // var user = uow.Members.GetByIdAsync(userId).Result;
-                // i przypisać go do context.User wraz z rolą…
+            
 
                 var claimsIdentity = new ClaimsIdentity(new[]
                 {
@@ -72,7 +69,7 @@ namespace LibraryManagement.API.Middleware
             }
             catch
             {
-                // jeśli walidacja nie powiedzie się, kontekst użytkownika nie jest ustawiany
+              
             }
         }
     }

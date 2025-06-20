@@ -1,5 +1,4 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using LibraryManagement.Infrastructure.Configuration;
@@ -17,14 +16,10 @@ namespace LibraryManagement.Infrastructure.Services
             _settings = options.Value;
         }
 
-        /// <summary>
-        /// Czas życia tokenu w minutach, eksponowany publicznie.
-        /// </summary>
+    
         public int ExpiresInMinutes => _settings.JwtExpiresMinutes;
 
-        /// <summary>
-        /// Generuje token JWT podpisany HMAC-SHA256, z Issuer i Audience.
-        /// </summary>
+ 
         public string GenerateToken(int userId, string role)
         {
             var keyBytes = Encoding.UTF8.GetBytes(_settings.JwtSecret);

@@ -17,12 +17,12 @@ namespace LibraryManagement.UI.Pages.Admin.Books
         [BindProperty]
         public CreateBookDto Book { get; set; } = new();
 
-        // Lista autorów do dropdowna
+   
         public List<AuthorDto> Authors { get; set; } = new();
 
         public async Task OnGetAsync()
         {
-            // pobierz autorów z API
+          
             Authors = await _client.GetFromJsonAsync<List<AuthorDto>>("api/authors")
                       ?? new List<AuthorDto>();
         }
@@ -31,7 +31,7 @@ namespace LibraryManagement.UI.Pages.Admin.Books
         {
             if (!ModelState.IsValid)
             {
-                await OnGetAsync();  // za³aduj ponownie Authors
+                await OnGetAsync();  
                 return Page();
             }
 

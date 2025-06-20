@@ -1,10 +1,6 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using LibraryManagement.Contracts;             // LoginRequestDto, AuthResponseDto
+using LibraryManagement.Contracts;           
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -42,14 +38,14 @@ namespace LibraryManagement.UI.Pages.Account
             if (!ModelState.IsValid)
                 return Page();
 
-            // 1) Przygotuj DTO logowania
+          
             var loginReq = new LoginRequestDto
             {
                 Email = Email,
                 Password = Password
             };
 
-            // 2) Wyœlij do API
+       
             var response = await _client.PostAsJsonAsync("api/auth/login", loginReq);
             if (!response.IsSuccessStatusCode)
             {
@@ -57,7 +53,6 @@ namespace LibraryManagement.UI.Pages.Account
                 return Page();
             }
 
-            // 3) Odczytaj odpowiedŸ z serwera
             var auth = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
             if (auth is null)
             {
@@ -65,7 +60,6 @@ namespace LibraryManagement.UI.Pages.Account
                 return Page();
             }
 
-            // 4) Przygotuj claims
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, auth.UserId.ToString()),
@@ -75,10 +69,10 @@ namespace LibraryManagement.UI.Pages.Account
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            // 5) Oblicz moment wygaœniêcia cookie
+         
             var expiresUtc = DateTimeOffset.UtcNow.AddMinutes(auth.ExpiresInMinutes);
 
-            // 6) Zaloguj u¿ytkownika (cookie)
+         
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal,
@@ -88,7 +82,7 @@ namespace LibraryManagement.UI.Pages.Account
                     ExpiresUtc = expiresUtc
                 });
 
-            // 7) Przekieruj do panelu admin
+         
             return RedirectToPage("/Admin/Books/Index");
         }
     }

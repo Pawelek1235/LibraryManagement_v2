@@ -17,16 +17,16 @@ namespace LibraryManagement.UI.Pages.Admin.Books
         [BindProperty]
         public UpdateBookDto Book { get; set; } = new();
 
-        // <<< dodajemy listê autorów
+
         public List<AuthorDto> Authors { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            // pobierz listê autorów
+       
             Authors = await _client.GetFromJsonAsync<List<AuthorDto>>("api/authors")
                       ?? new List<AuthorDto>();
 
-            // pobierz dane ksi¹¿ki
+        
             var dto = await _client.GetFromJsonAsync<BookDto>($"api/books/{id}");
             if (dto == null) return NotFound();
 
@@ -45,7 +45,7 @@ namespace LibraryManagement.UI.Pages.Admin.Books
         {
             if (!ModelState.IsValid)
             {
-                // jeœli walidacja nie przejdzie, musimy ponownie za³adowaæ autorów
+           
                 Authors = await _client.GetFromJsonAsync<List<AuthorDto>>("api/authors")
                           ?? new List<AuthorDto>();
                 return Page();

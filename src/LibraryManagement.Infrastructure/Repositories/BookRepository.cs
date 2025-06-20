@@ -13,10 +13,7 @@ namespace LibraryManagement.Infrastructure.Repositories
         public BookRepository(LibraryDbContext context)
             : base(context) { }
 
-        /// <summary>
-        /// Dodatkowa metoda specyficzna dla repozytorium Book:
-        /// wyszukiwanie po fragmencie tytułu wraz z załadowaniem autora.
-        /// </summary>
+
         public async Task<IEnumerable<Book>> SearchByTitleAsync(string title)
         {
             return await _context.Books

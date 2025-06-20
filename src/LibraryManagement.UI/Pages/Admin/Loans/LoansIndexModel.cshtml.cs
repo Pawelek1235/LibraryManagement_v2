@@ -22,7 +22,7 @@ namespace LibraryManagement.UI.Pages.Admin.Loans
         {
             var client = _clientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {Request.Cookies["jwt"]}");
-            // Pobierz wszystkie po¿yczki, w REST API kontroler Loans powinien zwracaæ Book i Member
+        
             Loans = await client.GetFromJsonAsync<List<Loan>>("https://localhost:5001/api/loans");
         }
 

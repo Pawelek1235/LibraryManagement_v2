@@ -16,8 +16,7 @@ namespace LibraryManagement.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            // Tu możesz dodać konfiguracje Fluent API,
-            // np. builder.Entity<Book>().HasIndex(b => b.ISBN).IsUnique();
+        
         }
     }
 }

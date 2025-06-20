@@ -32,7 +32,7 @@ namespace LibraryManagement.UI.Pages.Admin.Members
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Jeœli model jest nieprawid³owy, wróæ na tê sam¹ stronê
+           
             if (!ModelState.IsValid)
                 return Page();
 
@@ -41,16 +41,16 @@ namespace LibraryManagement.UI.Pages.Admin.Members
 
             if (Member.Id == 0)
             {
-                // nowy cz³onek
+                
                 await client.PostAsJsonAsync("https://localhost:5001/api/members", Member);
             }
             else
             {
-                // edycja istniej¹cego
+                
                 await client.PutAsJsonAsync($"https://localhost:5001/api/members/{Member.Id}", Member);
             }
 
-            // Po zapisie przekieruj z powrotem na listê
+       
             return RedirectToPage("MembersIndex");
         }
     }

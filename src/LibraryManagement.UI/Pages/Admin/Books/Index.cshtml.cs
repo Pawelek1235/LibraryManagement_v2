@@ -1,4 +1,3 @@
-using LibraryManagement.UI.Models; // BookDto
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using LibraryManagement.Grpc.Protos;
@@ -24,7 +23,7 @@ namespace LibraryManagement.UI.Pages.Admin.Books
                     ?? new List<BookDto>();
         }
 
-        // handler wywo³ywany przez <form asp-page-handler="Delete">
+      
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             _client.DefaultRequestHeaders.Remove("Authorization");
@@ -33,7 +32,7 @@ namespace LibraryManagement.UI.Pages.Admin.Books
             var response = await _client.DeleteAsync($"api/books/{id}");
             if (response.IsSuccessStatusCode)
             {
-                // mo¿esz odœwie¿yæ listê, albo po prostu przekierowaæ i prze³adowaæ OnGet
+                
                 return RedirectToPage();
             }
             ModelState.AddModelError("", "B³¹d usuwania ksi¹¿ki.");

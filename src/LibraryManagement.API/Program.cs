@@ -12,22 +12,22 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Wczytanie ustawieñ JWT z appsettings.json
+
 builder.Services.Configure<AppSettings>(
     builder.Configuration.GetSection("AppSettings"));
 var appSettings = builder.Configuration
     .GetSection("AppSettings")
     .Get<AppSettings>()!;
 
-// 2. DbContext In-Memory
+
 builder.Services.AddDbContext<LibraryDbContext>(opts =>
     opts.UseInMemoryDatabase("LibraryDb"));
 
-// 3. Rejestracja UnitOfWork i generatora tokenów
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 
-// 4. Uwierzytelnianie JWT-Bearer
+
 var key = Encoding.UTF8.GetBytes(appSettings.JwtSecret!);
 builder.Services
     .AddAuthentication(options =>
@@ -51,10 +51,9 @@ builder.Services
         };
     });
 
-// 5. Kontrolery
 builder.Services.AddControllers();
 
-// 6. Swagger/OpenAPI z obs³ug¹ Bearer
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -77,7 +76,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// 7. Seedowanie danych
 using var scope = app.Services.CreateScope();
 var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
@@ -111,7 +109,6 @@ if (!(await uow.Authors.GetAllAsync()).Any())
     await uow.SaveChangesAsync();
 }
 
-// 8. Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -6,8 +6,6 @@ namespace LibraryManagement.API.Models
     {
         public string Token { get; set; }
         public DateTime Expires { get; set; }
-
-        // Dodajemy:
         public string Role { get; set; }
         public int UserId { get; set; }   
     }

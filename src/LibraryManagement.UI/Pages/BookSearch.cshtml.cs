@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using LibraryManagement.Contracts;    // BookDto
+using LibraryManagement.Contracts;    
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -13,7 +8,6 @@ namespace LibraryManagement.UI.Pages
     {
         private readonly HttpClient _client;
 
-        // U¿ywamy ApiClient, bo w Program.cs jest on skonfigurowany z BaseAddress do Twojego API
         public BookSearchModel(IHttpClientFactory httpFactory)
         {
             _client = httpFactory.CreateClient("ApiClient");
@@ -26,7 +20,7 @@ namespace LibraryManagement.UI.Pages
 
         public void OnGet()
         {
-            // tylko pokazujemy stronê – bez wyszukiwania
+           
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -39,10 +33,10 @@ namespace LibraryManagement.UI.Pages
 
             try
             {
-                // Skonstruuj œcie¿kê wzglêdn¹ – BaseAddress jest ju¿ ustawione w ApiClient
+             
                 var url = $"api/books/search?title={Uri.EscapeDataString(Query)}";
 
-                // Wyœlij ¿¹danie GET i deserializuj JSON do List<BookDto>
+               
                 var response = await _client.GetFromJsonAsync<List<BookDto>>(url);
                 Results = response ?? new List<BookDto>();
             }
