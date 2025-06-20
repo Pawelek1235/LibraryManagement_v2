@@ -10,22 +10,17 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. AppSettings
 builder.Services.Configure<AppSettings>(
     builder.Configuration.GetSection("AppSettings"));
 
-// 2. DbContext
 builder.Services.AddDbContext<LibraryDbContext>(opts =>
     opts.UseInMemoryDatabase("LibraryDb"));
 
-// 3. Rejestracja UnitOfWork i JwtGenerator
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 
-// 4. Kontrolery
 builder.Services.AddControllers();
 
-// 5. Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -48,7 +43,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// 6. Seeding danych startowych
 using (var scope = app.Services.CreateScope())
 {
     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -68,8 +62,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
-// --- ziarno autorów ---
 using (var scope = app.Services.CreateScope())
 {
     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -86,10 +78,9 @@ using (var scope = app.Services.CreateScope())
             Bio = "Autorka ksi¹¿ek o programowaniu."
         });
         await uow.SaveChangesAsync();
-
     }
 }
-// 7. Pipeline
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
